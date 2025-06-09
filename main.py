@@ -21,7 +21,10 @@ def main(folder:str):
         if node.isfile:
             try:
                 new_name = name_pruner.execute(node.abspath)
-                # print(f"Renamed '{node.abspath}' to '{new_name}'")
+                if new_name != node.abspath:
+                    print(f"Renaming '{node.abspath}' to '{new_name}'")
+                else:
+                    print(f"No changes for '{node.abspath}'")
             except FileNotFoundError as e:
                 print(e)
 
