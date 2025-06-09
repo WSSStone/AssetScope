@@ -1,0 +1,8 @@
+{
+    "textures": {
+        "ood_prefix": ["T_SM_S_bld_", "T_S_prp_", "T_ST_MCC_ZT_", "T_CO_MGH01"],
+        "ood_suffix": [""],
+        "new_prefix": "T",
+        "new_suffix": ""
+    }
+}
