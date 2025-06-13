@@ -1,0 +1,23 @@
+{
+  "name": "com.assetscope.com",
+  "version": "1.0.0",
+  "displayName": "Asset Scope",
+  "description": "AssetScope is a tool for managing & exporting assets in Unity projects.",
+  "unity": "2019.1",
+  "documentationUrl": "",
+  "changelogUrl": "",
+  "licensesUrl": "",
+  "keywords": [
+    "asset",
+    "export",
+    "management"
+  ],
+  "author": {
+    "name": "wssstone",
+    "email": "wangshi9393@gmail.com"
+  },
+  "dependencies": {
+    "com.unity.formats.fbx": "4.1.3",
+    "com.autodesk.fbx": "4.1.2"
+  }
+}
