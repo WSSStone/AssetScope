@@ -275,7 +275,17 @@ namespace AssetScope
 
 	public class AssetManageHelper : PrefabHelper
 	{
-		private const string m_ConfigPath = "Packages/com.migu.assetscope/Editor/Assets/AssetManagementSettings.asset";
+		private static string s_ConfigPath
+		{
+			get
+			{
+				var guids = AssetDatabase.FindAssets("AssetManagementSettings t:AssetManagementConfig");
+				if (guids.Length > 0)
+					return AssetDatabase.GUIDToAssetPath(guids[0]);
+				// fallback to default
+				return "Packages/com.migu.assetscope/Editor/Assets/AssetManagementSettings.asset";
+			}
+		}
 		public AssetManagementConfig m_Config;
 		public MeshTextureMapping m_MeshTextureMap;
 
@@ -381,11 +391,11 @@ namespace AssetScope
 
 		public AssetManageHelper()
 		{
-			m_Config = AssetDatabase.LoadAssetAtPath<AssetManagementConfig>(m_ConfigPath);
+			m_Config = AssetDatabase.LoadAssetAtPath<AssetManagementConfig>(s_ConfigPath);
 			if (m_Config == null)
 			{
 				m_Config = ScriptableObject.CreateInstance<AssetManagementConfig>();
-				AssetDatabase.CreateAsset(m_Config, m_ConfigPath);
+				AssetDatabase.CreateAsset(m_Config, s_ConfigPath);
 				AssetDatabase.Refresh();
 			}
 
