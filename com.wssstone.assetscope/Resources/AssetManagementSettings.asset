@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeea8fb9c45af2346ab22dce8f89823b, type: 3}
+  m_Name: AssetManagementSettings
+  m_EditorClassIdentifier: 
+  PrefabDirs:
+  - Assets/MetaMeeting/Models/Scenes/PortalScene/7/MCC_QYH
+  - Assets/MetaMeeting/Models/Scenes/PortalScene/7/MCC_QYH_TEST
+  PrefabAssetInfoPath: Packages/com.migu.assetscope/Editor/Assets/PrefabAssetInfo.asset
+  MeshTextureMappingPath: Packages/com.migu.assetscope/Editor/Assets/MeshTextureMapping.asset
+  AlbedoName: _BaseMap
+  NormalName: _BumpMap
+  MaskName: _MetallicGlossMap
+  ModelRanges:
+  - Assets/MetaMeeting/Models/Scenes/PortalScene/7/MCC_QYH
+  - Assets/MetaMeeting/Models/Scenes/PortalScene/7/MCC_QYH_TEST
+  OldPrefix:
+  - F_ST_MCC_HKJ01_
+  - GR_MCC_QYH01_
+  - SM_MCC_HKJ01_
+  - SM_MCC_QYH_
+  - ST_MCC_DHT_
+  - ST_MCC_HYS_
+  - ST_MCC_HYS_
+  - ST_MCC_QYH_
+  - ST_MCC_ZT_
+  - SM_S_prp_
+  - SM_ST_MB_
+  - CO_MGH01_
+  - INT_QHH_
+  - GR_GC01_
+  - CO_GC01_
+  - ST_GC01_
+  - QYH_
+  - INT_
+  - SM_
+  - SK_
+  OldSuffix:
+  - _0*\\d+$
+  MeshPrefix: GR_MCC_QYH01_
+  MeshSuffix: _0001
+  ExportDir: E:/Work/MCC/QYHAssets
