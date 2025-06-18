@@ -523,6 +523,7 @@ namespace AssetScope
 				(string main, string num) = NamingUtils.ExtractMainNameAndNumber(newname, m_MeshSuffix.Replace("_", ""));
 
 				newname = $"{m_MeshPrefix}{main}_{num}";
+				meshTuple.m_Asset.name = newname;
 				string res = AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(meshTuple.m_Asset), newname);
 
 				while (!string.IsNullOrEmpty(res))
@@ -531,6 +532,7 @@ namespace AssetScope
 					int n = int.Parse(num);
 					num = (n + 1).ToString().PadLeft(4, '0');
 					newname = $"{m_MeshPrefix}{main}_{num}";
+					meshTuple.m_Asset.name = newname;
 					res = AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(meshTuple.m_Asset), newname);
 				}
 				
