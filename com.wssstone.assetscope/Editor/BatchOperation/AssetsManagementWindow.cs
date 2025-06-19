@@ -160,9 +160,14 @@ namespace AssetScope
 			EditorGUILayout.EndHorizontal();
 
 			EditorGUILayout.BeginHorizontal();
-			m_AssetHelper.m_MeshPrefix = EditorGUILayout.TextField("Mesh前缀", m_AssetHelper.m_MeshPrefix);
-			m_AssetHelper.m_MeshSuffix = EditorGUILayout.TextField("Mesh后缀", m_AssetHelper.m_MeshSuffix);
+			m_AssetHelper.m_MeshNameRule.Prefix = EditorGUILayout.TextField("Mesh前缀", m_AssetHelper.m_MeshNameRule.Prefix);
+			m_AssetHelper.m_MeshNameRule.SuffixRule = (ESUFFIXRULE)EditorGUILayout.EnumPopup("后缀规则", m_AssetHelper.m_MeshNameRule.SuffixRule);
+			using (new EditorGUI.DisabledScope(m_AssetHelper.m_MeshNameRule.SuffixRule == ESUFFIXRULE.None))
+			{
+				m_AssetHelper.m_MeshNameRule.SuffixPad = EditorGUILayout.IntField("后缀填位", m_AssetHelper.m_MeshNameRule.SuffixPad);
+			}
 			EditorGUILayout.EndHorizontal();
+
 			if (GUILayout.Button("重命名Mesh"))
 			{
 				m_AssetHelper.RenameMeshes();
@@ -181,6 +186,25 @@ namespace AssetScope
 				}
 			}
 			EditorGUILayout.EndHorizontal();
+
+			EditorGUILayout.BeginHorizontal();
+			m_AssetHelper.m_MaterialNameRule.Prefix = EditorGUILayout.TextField("材质前缀", m_AssetHelper.m_MaterialNameRule.Prefix);
+			m_AssetHelper.m_MaterialNameRule.SuffixRule = (ESUFFIXRULE)EditorGUILayout.EnumPopup("后缀规则", m_AssetHelper.m_MaterialNameRule.SuffixRule);
+			using (new EditorGUI.DisabledScope(m_AssetHelper.m_MaterialNameRule.SuffixRule == ESUFFIXRULE.None))
+			{
+				m_AssetHelper.m_MaterialNameRule.SuffixPad = EditorGUILayout.IntField("后缀填位", m_AssetHelper.m_MaterialNameRule.SuffixPad);
+			}
+			EditorGUILayout.EndHorizontal();
+
+			EditorGUILayout.BeginHorizontal();
+			m_AssetHelper.m_TextureNameRule.Prefix = EditorGUILayout.TextField("贴图前缀", m_AssetHelper.m_TextureNameRule.Prefix);
+			m_AssetHelper.m_TextureNameRule.SuffixRule = (ESUFFIXRULE)EditorGUILayout.EnumPopup("后缀规则", m_AssetHelper.m_TextureNameRule.SuffixRule);
+			using (new EditorGUI.DisabledScope(m_AssetHelper.m_TextureNameRule.SuffixRule == ESUFFIXRULE.None))
+			{
+				m_AssetHelper.m_TextureNameRule.SuffixPad = EditorGUILayout.IntField("后缀填位", m_AssetHelper.m_TextureNameRule.SuffixPad);
+			}
+			EditorGUILayout.EndHorizontal();
+
 			if (GUILayout.Button("输出资产"))
 			{
 				m_AssetHelper.Export();
@@ -339,25 +363,36 @@ namespace AssetScope
 			}
 		}
 
-		public string m_MeshPrefix
+		public RenameRule m_MeshNameRule
 		{
-			get => m_Config.MeshPrefix;
+			get => m_Config.MeshRenameRule;
 			set
 			{
-				m_Config.MeshPrefix = value;
+				m_Config.MeshRenameRule = value;
 				EditorUtility.SetDirty(m_Config);
 			}
 		}
 
-		public string m_MeshSuffix
+		public RenameRule m_MaterialNameRule
 		{
-			get => m_Config.MeshSuffix;
+			get => m_Config.MaterialRenameRule;
 			set
 			{
-				m_Config.MeshSuffix = value;
+				m_Config.MaterialRenameRule = value;
 				EditorUtility.SetDirty(m_Config);
 			}
 		}
+
+		public RenameRule m_TextureNameRule
+		{
+			get => m_Config.TextureRenameRule;
+			set
+			{
+				m_Config.TextureRenameRule = value;
+				EditorUtility.SetDirty(m_Config);
+			}
+		}
+
 
 		public string m_ExportDir
 		{
@@ -520,19 +555,33 @@ namespace AssetScope
 				var newname = NamingUtils.RemovePrefix(m_OldPrefix, oldname);
 				newname = NamingUtils.RemoveSuffix(m_OldSuffix, newname);
 
-				(string main, string num) = NamingUtils.ExtractMainNameAndNumber(newname, m_MeshSuffix.Replace("_", ""));
+				(string main, string num) = NamingUtils.ExtractMainNameAndNumber(newname);
 
-				newname = $"{m_MeshPrefix}{main}_{num}";
-				meshTuple.m_Asset.name = newname;
+				string suf = "";
+				string number = "1";
+
+				Action createSuffix = () => {
+					if (m_MeshNameRule.SuffixRule != ESUFFIXRULE.None)
+					{
+						number = string.IsNullOrEmpty(num) ? number : int.Parse(num).ToString();
+						number = number.PadLeft(m_MeshNameRule.SuffixPad, '0');
+						suf = $"_{number}";
+					}
+				};
+
+				createSuffix();
+
+				newname = $"{m_MeshNameRule.Prefix}{main}{suf}";
 				string res = AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(meshTuple.m_Asset), newname);
 
+				number = "0";
 				while (!string.IsNullOrEmpty(res))
 				{
 					Debug.Log($"Retry remame <b>{meshTuple.m_Asset}</b> because <b>{res}</b>");
-					int n = int.Parse(num);
-					num = (n + 1).ToString().PadLeft(4, '0');
-					newname = $"{m_MeshPrefix}{main}_{num}";
-					meshTuple.m_Asset.name = newname;
+
+					suf = "";
+					createSuffix();
+					newname = $"{m_MeshNameRule.Prefix}{main}{suf}";
 					res = AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(meshTuple.m_Asset), newname);
 				}
 				
@@ -566,7 +615,7 @@ namespace AssetScope
 			{
 				ExportMeshTextureTuple(meshTuple);
 			}
-
+			
 			CleanUpTemps();
 		}
 
@@ -617,10 +666,7 @@ namespace AssetScope
 			for (int i = 0; i < len; ++i)
 			{
 				var textureSet = textureSets[i];
-				if (len == 1)
-					ExportTextures(textureSet, meshDir, path.Split('.').First());
-				else
-					ExportTextures(textureSet, meshDir, path.Split('.').First(), i);
+				ExportTextures(textureSet, meshDir, path.Split('.').First(), i);
 			}
 
 			AssetDatabase.Refresh();
@@ -652,14 +698,15 @@ namespace AssetScope
 					var newMat = new Material(oldMat);
 
 					var matname = inst.name;
-					matname = NamingUtils.RemovePrefix(new string[] { m_MeshPrefix }, matname);
+					matname = NamingUtils.RemovePrefix(new string[] { m_MeshNameRule.Prefix }, matname);
 					matname = NamingUtils.RemoveSuffix(new string[] { "_0*\\d+$" }, matname);
 
-					matname = NamingUtils.RemovePrefix(m_OldPrefix, matname);
-					matname = NamingUtils.RemoveSuffix(m_OldSuffix, matname);
-
-					var matsuffix = (order++).ToString("D4");
-					newMat.name = $"MI_{matname}_{matsuffix}";
+					var matsuffix = "";
+					if (m_MaterialNameRule.SuffixRule != ESUFFIXRULE.None)
+					{
+						matsuffix = $"_{(order++).ToString().PadLeft(m_MaterialNameRule.SuffixPad, '0')}";
+					}
+					newMat.name = $"{m_MaterialNameRule.Prefix}_{matname}{matsuffix}";
 
 					// Assign the new material
 					materials[i] = newMat;
@@ -683,15 +730,21 @@ namespace AssetScope
 
 		private void ExportTextures(PBRTextureSet TextureSet, string MeshDir, string MeshName, int Index = -1)
 		{
-			string order = Index == -1 ? "" : (Index + 1).ToString("D4");
+			(string meshName, string number) = NamingUtils.ExtractMainNameAndNumber(MeshName);
 
-			string albedoFilename = string.Format("T_{0}{1}_D", MeshName, order);
+			string suf = "";
+			if (m_TextureNameRule.SuffixRule != ESUFFIXRULE.None)
+			{
+				suf = $"_{(Index + 1).ToString().PadLeft(m_TextureNameRule.SuffixPad, '0')}";
+			}
+
+			string albedoFilename = $"{m_TextureNameRule.Prefix}_{meshName}{suf}_D";
 			ExportTexture(TextureSet.Albedo, MeshDir, albedoFilename);
 
-			string normalFilename = string.Format("T_{0}{1}_N", MeshName, order);
+			string normalFilename = $"{m_TextureNameRule.Prefix}_{meshName}{suf}_N";
 			ExportTexture(TextureSet.Normal, MeshDir, normalFilename);
 
-			string maskFilename = string.Format("T_{0}{1}_M", MeshName, order);
+			string maskFilename = $"{m_TextureNameRule.Prefix}_{meshName}{suf}_M";
 			ExportTexture(TextureSet.Mask, MeshDir, maskFilename);
 		}
 
